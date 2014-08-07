@@ -1,4 +1,5 @@
 import sublime, sublime_plugin, webbrowser
+import os.path
 
 import re
 
@@ -12,6 +13,7 @@ ISSUE_REGEX = 'TODO\:?(.*)'
 
 class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
+		
 		view = self.view
 		something_happened = False
 		for regionOfLines in view.sel():
@@ -41,6 +43,13 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 		print(title, edit, point)
 		self.view.insert(edit, point, "aba zaba")
 
+	def get_file_directory(self):
+		name = self.view.file_name()
+		if not name:
+			panic("File hasn't been saved")
+
+		return path 
+
 def extract_issue_title(line):
 	matches = re.findall(ISSUE_REGEX, line)
 	if matches:
@@ -57,3 +66,7 @@ def extract_issue_link(line):
 
 def open_url(url):
 	webbrowser.open_new_tab('https://' + url)
+
+def panic(error):
+	sublime.error_message("Ticket Master Error: " + error)
+	raise Exception(error)
