@@ -7,29 +7,36 @@ ISSUE_LINK_REGEX = ('\[(' + # capture everything after an open bracket
 				    '[^\]]*' + # followed by everything that isn't a close bracket
 				    ')\]') # followed by a close bracket (outside the capturing group)
 
+
+
 class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		view = self.view
+		something_happened = False
 		for region in view.sel():
 			lines = view.line(region)
 			lines = view.substr(lines)
 
-			issue_urls = extract_issue_links(lines)
-			if issue_urls:
-				for url in issue_urls:
-					open_url(url) 
-			else:
-				titles = extract_issue_titles(lines)
-				if titles:
-					for atitle in titles:
-						push_issue(atitle) 
+			for aline in lines.split('\n'):			
+				
+				issue_url = extract_issue_link(aline)
+
+				if issue_url:
+					open_url(issue_url) 
+					something_happened = True
 				else:
-					push_issue(None)
+					title = extract_issue_title(aline)
+					if title:
+						push_issue(atitle) 
+						something_happened = True
+
+		if not something_happened:
+			push_issue(None)
 
 
 
-def extract_issue_links(lines):
-	return re.findall(ISSUE_LINK_REGEX, lines)
+def extract_issue_link(lines):
+	return re.findall(ISSUE_LINK_REGEX, lines)[-1]
 
 def open_url(url):
 	webbrowser.open_new_tab('https://' + url)
