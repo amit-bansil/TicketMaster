@@ -16,11 +16,20 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 
 			issue_urls = extract_issue_links(lines)
 			if issue_urls:
-				open_url(url) for url in issue_urls
+				for url in issue_urls:
+					open_url(url) 
 			else:
 				titles = extract_issue_titles(lines)
 				if titles:
-					push_issue(atitle) for atitle in titles
+					for atitle in titles:
+						push_issue(atitle) 
 				else:
 					push_issue(None)
 
+
+
+def extract_issue_links(lines):
+	return re.findall(ISSUE_LINK_REGEX, lines)
+
+def open_url(url):
+	webbrowser.open_new_tab('https://' + url)
