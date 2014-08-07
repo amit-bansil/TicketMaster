@@ -17,7 +17,10 @@ HTTPS_PREFIX = 'https://'
 GITHUB_PREFIX = 'github.com/'
 GIT_SUFFIX = '.git'
 
-TOKEN_URL = 'https://github.com/settings/tokens/new?scopes=repo,public_repo'
+TOKEN_URL = 'github.com/settings/tokens/new?scopes=repo,public_repo'
+TOKEN_KEY = 'tm-github-token'
+
+PREFERENCES_FILE = 'Preferences.sublime-settings'
 
 class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -50,7 +53,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 
 	def push_issue(self, edit, point, title):
 
-		
+
 		# Write url in file
 		self.view.insert(edit, point, "aba zaba")
 
@@ -80,6 +83,24 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 			panic("File hasn't been saved")
 
 		return path.dirname(filepath)
+
+	def get_github_token(self):
+		s = sublime.load_settings(PREFERENCES_FILE)
+		t = s.get(TOKEN_KEY, None)
+
+		if t:
+			return t
+		else:
+
+			open_url(TOKEN_URL)
+
+	def save_github_token(self, token):
+		pass
+
+class RemovetokenCommand(sublime_plugin.ApplicationCommand):
+	def run(self, edit):
+		s = sublime.load_settings(PREFERENCES_FILE)
+		s.erase()
 
 def extract_issue_title(line):
 	matches = re.findall(ISSUE_REGEX, line)

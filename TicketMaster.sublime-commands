@@ -1,3 +1,4 @@
 [
-    { "caption": "Ticket Master: New Issue", "command": "createissue" }
+    { "caption": "Ticket Master: New Issue", "command": "createissue" },
+    { "caption": "Ticket Master: Remove Token", "command": "removetoken" },
 ]
