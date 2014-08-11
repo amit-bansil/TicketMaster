@@ -23,7 +23,6 @@ ISSUE_LINK_REGEX = (
 
 ISSUE_REGEX = 'TODO\:?(.*)'
 
-SSH_PREFIX = 'git@github.com:'
 GITHUB_API_PREFIX = 'api.'
 GITHUB_PREFIX = 'github.com/'
 GIT_SUFFIX = '.git'
@@ -95,8 +94,8 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 			output = output.decode("utf-8")
 			if output.startswith('https://' + GITHUB_PREFIX):
 				output = output[len('https://')+len(GITHUB_PREFIX):]
-			elif output.startswith(SSH_PREFIX):
-				output = output[len(SSH_PREFIX):]
+			elif output.startswith(REPO_SSH_PREFIX):
+				output = output[len(REPO_SSH_PREFIX):]
 			else:
 				panic("Upstream remote is not a github repository. Got " + output + " instead.")
 
