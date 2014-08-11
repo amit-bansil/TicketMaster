@@ -62,12 +62,12 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 
 	def push_issue(self, edit, point, title):
 
-		token = self.get_github_token()
-		url = ISSUE_API_URL_PATTERN.format(repo=self.get_github_repo())
+		github_token = self.get_github_token()
+		create_url = ISSUE_API_URL_PATTERN.format(repo=self.get_github_repo())
 
-		print(url)
+		#print(url)
 
-		res = authenticated_post(url, token, json.dumps({'title':title}))
+		res = authenticated_post(create_url, github_token, title=title)
 		res_body = res.read().decode('utf-8')
 		print(res_body)
 
@@ -174,21 +174,22 @@ def request(method, url, options=None):
 	conn.request(method, path, body, headers)
 	return conn.getresponse()
 
-def authenticated_post(url, token, params=None):
-	params = params or {}
+def authenticated_post(url, token, params={}):
+	if(params)
+		params = json.dumps(params)
 
-	print('{0}:{1}'.format(token, ''))
-	print('{0}:{1}'.format(token, '').encode('utf-8'))
+	auth_token  = '{0}:{1}'.format(token, '').encode('utf-8')
+	encoded_auth_token = base64.b64encode(auth_token) #TODO fix bug
+	auth_string = 'Basic {0}'.format(encoded_auth_token.decode('utf-8'))
 
-	encoded_userpass = base64.b64encode('{0}:{1}'.format(token, '').encode('utf-8')) #TODO fix bug
-	auth_string = 'Basic {0}'.format(encoded_userpass.decode('utf-8'))
+	headers = {}
+	headers['Authorization'] = auth_string
+	headers['Content-type'] = 'application/x-www-form-urlencoded'
+	headers['User-Agent'] = 'ticketmaster'
 
-	options = {'params': params,
-			   'ssl': True,
-			   'headers': {'Authorization': auth_string,
-						   'Content-type': 'application/x-www-form-urlencoded',
-						   'User-Agent': 'ticketmaster'}}
-
-	print(options)
+	options = {}
+	options['params'] = params
+	options['ssl'] = True
+	options['headers'] = headers
 
 	return request('POST', url, options)
