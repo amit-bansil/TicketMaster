@@ -22,12 +22,12 @@ ISSUE_LINK_REGEX = (
 	')\]') # followed by a close bracket (outside the capturing group)
 
 ISSUE_REGEX = 'TODO\:?(.*)'
-
-GITHUB_API_PREFIX = 'api.'
-GITHUB_PREFIX = 'github.com/'
+GITHUB_DOMAIN = 'github.com/'
+ISSUE_API_URL_PATTERN = 'https://api.' + GITHUB_DOMAIN + "repos/{repo}/issues"
+NEW_ISSUE_URL_PATTERN = GITHUB_DOMAIN + "{repo}/issues/new"
 GIT_SUFFIX = '.git'
 
-TOKEN_URL = 'github.com/settings/tokens/new?scopes=repo,public_repo'
+TOKEN_URL = GITHUB_DOMAIN + 'settings/tokens/new?scopes=repo,public_repo'
 TOKEN_KEY = 'tm-github-token'
 
 PREFERENCES_FILE = 'Preferences.sublime-settings'
@@ -36,7 +36,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		
 		# Check if the user is already logged in.
-		print(self.get_github_token())
+		#print(self.get_github_token())
 
 		view = self.view
 		something_happened = False
@@ -57,17 +57,13 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 						self.push_issue(edit, fullLineRegion.end(), title)
 						something_happened = True
 
-		if not something_happened:
-			self.create_new_issue()
-
-	def create_new_issue(self):
-		url = GITHUB_PREFIX + self.get_github_repo() + "/issues/new"
-		open_url(url)
+		if not something_happened:	
+			open_url(NEW_ISSUE_URL_PATTERN.format(repo=self.get_github_repo()))
 
 	def push_issue(self, edit, point, title):
 
 		token = self.get_github_token()
-		url = 'https://' + GITHUB_API_PREFIX + GITHUB_PREFIX + "repos/" + self.get_github_repo() + "/issues"
+		url = ISSUE_API_URL_PATTERN.format(repo=self.get_github_repo())
 
 		print(url)
 
@@ -92,8 +88,8 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 		try: 
 			output = subprocess.check_output(["git", "ls-remote","--get-url"], cwd=file_dir)
 			output = output.decode("utf-8")
-			if output.startswith('https://' + GITHUB_PREFIX):
-				output = output[len('https://')+len(GITHUB_PREFIX):]
+			if output.startswith('https://' + GITHUB_DOMAIN):
+				output = output[len('https://')+len(GITHUB_DOMAIN):]
 			elif output.startswith(REPO_SSH_PREFIX):
 				output = output[len(REPO_SSH_PREFIX):]
 			else:
