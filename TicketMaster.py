@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 #TODO extract constants [github.com/amit-bansil/TicketMaster/issues/12]
 
 #TODO fix crash on select all [github.com/amit-bansil/TicketMaster/issues/13]
+
 ISSUE_LINK_REGEX = (
 	'\[(' + # capture everything after an open bracket
 	'github\.com\/' + # that starts with github.com
