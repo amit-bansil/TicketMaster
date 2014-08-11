@@ -24,7 +24,6 @@ ISSUE_LINK_REGEX = (
 ISSUE_REGEX = 'TODO\:?(.*)'
 
 SSH_PREFIX = 'git@github.com:'
-HTTPS_PREFIX = 'https://'
 GITHUB_API_PREFIX = 'api.'
 GITHUB_PREFIX = 'github.com/'
 GIT_SUFFIX = '.git'
@@ -69,7 +68,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 	def push_issue(self, edit, point, title):
 
 		token = self.get_github_token()
-		url = HTTPS_PREFIX + GITHUB_API_PREFIX + GITHUB_PREFIX + "repos/" + self.get_github_repo() + "/issues"
+		url = 'https://' + GITHUB_API_PREFIX + GITHUB_PREFIX + "repos/" + self.get_github_repo() + "/issues"
 
 		print(url)
 
@@ -83,7 +82,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 				issue = res_params.get('html_url')
 				print(issue)
 				# Write url in file
-				self.view.insert(edit, point, ' [{}]'.format(issue[len(HTTPS_PREFIX):]))
+				self.view.insert(edit, point, ' [{}]'.format(issue[len('https://'):]))
 			except:
 				panic("Crash reading github JSON")
 		else:
@@ -94,8 +93,8 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 		try: 
 			output = subprocess.check_output(["git", "ls-remote","--get-url"], cwd=file_dir)
 			output = output.decode("utf-8")
-			if output.startswith(HTTPS_PREFIX+GITHUB_PREFIX):
-				output = output[len(HTTPS_PREFIX)+len(GITHUB_PREFIX):]
+			if output.startswith('https://' + GITHUB_PREFIX):
+				output = output[len('https://')+len(GITHUB_PREFIX):]
 			elif output.startswith(SSH_PREFIX):
 				output = output[len(SSH_PREFIX):]
 			else:
@@ -139,7 +138,7 @@ def extract_issue_link(line):
 		return None
 
 def open_url(url):
-	webbrowser.open_new_tab(HTTPS_PREFIX + url)
+	webbrowser.open_new_tab('https://' + url)
 
 def panic(error):
 	sublime.error_message("Ticket Master Error: " + error)
