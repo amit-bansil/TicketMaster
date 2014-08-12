@@ -1,6 +1,7 @@
-#TODO network errors
+# TODO network errors
 
-import sublime, sublime_plugin
+import sublime
+import sublime_plugin
 
 import uicopy
 
@@ -14,14 +15,14 @@ import json
 import re
 from urllib.parse import urlparse
 
-#TODO fix crash on select all [github.com/amit-bansil/TicketMaster/issues/13]
+# TODO fix crash on select all [github.com/amit-bansil/TicketMaster/issues/13]
 
 
 ISSUE_LINK_REGEX = (
-    '\[(' + # capture everything after an open bracket
-    'github\.com\/' + # that starts with github.com
-    '[^\]]*' + # followed by everything that isn't a close bracket
-    ')\]') # followed by a close bracket (outside the capturing group)
+    '\[(' +  # capture everything after an open bracket
+    'github\.com\/' +  # that starts with github.com
+    '[^\]]*' +  # followed by everything that isn't a close bracket
+    ')\]')  # followed by a close bracket (outside the capturing group)
 
 ISSUE_REGEX = 'TODO\:?(.*)'
 GITHUB_DOMAIN = 'github.com/'
@@ -33,6 +34,7 @@ TOKEN_URL = GITHUB_DOMAIN + 'settings/tokens/new?scopes=repo,public_repo'
 TOKEN_KEY = 'tm-github-token'
 
 PREFERENCES_FILE = 'Preferences.sublime-settings'
+
 
 class CreateissueCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -51,7 +53,6 @@ class CreateissueCommand(sublime_plugin.TextCommand):
                     something_happened = True
                 else:
                     title = extract_issue_title(line)
-                    #print('title', title)
                     if title:
                         self.push_issue(edit, fullLineRegion.end(), title)
                         something_happened = True
@@ -64,12 +65,8 @@ class CreateissueCommand(sublime_plugin.TextCommand):
         github_token = self.get_github_token()
         create_url = ISSUE_API_URL_PATTERN.format(repo=self.get_github_repo())
 
-        #print(url)
-
         res = authenticated_post(create_url, github_token, title=title)
         res_body = res.read().decode('utf-8')
-        #print(res_body)
-
         if res.status == 201:
             try:
                 res_params = json.loads(res_body) 
@@ -179,7 +176,7 @@ def authenticated_post(url, token, params={}):
         params = json.dumps(params)
 
     auth_token  = '{0}:{1}'.format(token, '').encode('utf-8')
-    encoded_auth_token = base64.b64encode(auth_token) #TODO fix bug
+    encoded_auth_token = base64.b64encode(auth_token) # TODO fix bug
     auth_string = 'Basic {0}'.format(encoded_auth_token.decode('utf-8'))
 
     headers = {}
