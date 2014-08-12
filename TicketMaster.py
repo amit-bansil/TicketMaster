@@ -1,3 +1,6 @@
+#TODO Sort dependencies [github.com/amit-bansil/TicketMaster/issues/11]
+#TODO network errors
+
 import sublime, sublime_plugin
 import os.path as path
 import subprocess
@@ -10,7 +13,9 @@ import re
 
 from urllib.parse import urlparse
 
-# TODO:Clean up the code [github.com/amit-bansil/TicketMaster/issues/10]
+#TODO extract constants [github.com/amit-bansil/TicketMaster/issues/12]
+#TODO fix crash on select all [github.com/amit-bansil/TicketMaster/issues/13]
+
 
 ISSUE_LINK_REGEX = (
 	'\[(' + # capture everything after an open bracket
@@ -19,14 +24,12 @@ ISSUE_LINK_REGEX = (
 	')\]') # followed by a close bracket (outside the capturing group)
 
 ISSUE_REGEX = 'TODO\:?(.*)'
-
-SSH_PREFIX = 'git@github.com:'
-HTTPS_PREFIX = 'https://'
-GITHUB_API_PREFIX = 'api.'
-GITHUB_PREFIX = 'github.com/'
+GITHUB_DOMAIN = 'github.com/'
+ISSUE_API_URL_PATTERN = 'https://api.' + GITHUB_DOMAIN + "repos/{repo}/issues"
+NEW_ISSUE_URL_PATTERN = GITHUB_DOMAIN + "{repo}/issues/new"
 GIT_SUFFIX = '.git'
 
-TOKEN_URL = 'github.com/settings/tokens/new?scopes=repo,public_repo'
+TOKEN_URL = GITHUB_DOMAIN + 'settings/tokens/new?scopes=repo,public_repo'
 TOKEN_KEY = 'tm-github-token'
 
 PREFERENCES_FILE = 'Preferences.sublime-settings'
@@ -35,7 +38,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		
 		# Check if the user is already logged in.
-		print(self.get_github_token())
+		#print(self.get_github_token())
 
 		view = self.view
 		something_happened = False
@@ -56,21 +59,17 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 						self.push_issue(edit, fullLineRegion.end(), title)
 						something_happened = True
 
-		if not something_happened:
-			self.create_new_issue()
-
-	def create_new_issue(self):
-		url = GITHUB_PREFIX + self.get_github_repo() + "/issues/new"
-		open_url(url)
+		if not something_happened:	
+			open_url(NEW_ISSUE_URL_PATTERN.format(repo=self.get_github_repo()))
 
 	def push_issue(self, edit, point, title):
 
-		token = self.get_github_token()
-		url = HTTPS_PREFIX + GITHUB_API_PREFIX + GITHUB_PREFIX + "repos/" + self.get_github_repo() + "/issues"
+		github_token = self.get_github_token()
+		create_url = ISSUE_API_URL_PATTERN.format(repo=self.get_github_repo())
 
-		print(url)
+		#print(url)
 
-		res = authenticated_post(url, token, json.dumps({'title':title}))
+		res = authenticated_post(create_url, github_token, title=title)
 		res_body = res.read().decode('utf-8')
 		print(res_body)
 
@@ -80,7 +79,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 				issue = res_params.get('html_url')
 				print(issue)
 				# Write url in file
-				self.view.insert(edit, point, ' [{}]'.format(issue[len(HTTPS_PREFIX):]))
+				self.view.insert(edit, point, ' [{}]'.format(issue[len('https://'):]))
 			except:
 				panic("Crash reading github JSON")
 		else:
@@ -91,10 +90,10 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 		try: 
 			output = subprocess.check_output(["git", "ls-remote","--get-url"], cwd=file_dir)
 			output = output.decode("utf-8")
-			if output.startswith(HTTPS_PREFIX+GITHUB_PREFIX):
-				output = output[len(HTTPS_PREFIX)+len(GITHUB_PREFIX):]
-			elif output.startswith(SSH_PREFIX):
-				output = output[len(SSH_PREFIX):]
+			if output.startswith('https://' + GITHUB_DOMAIN):
+				output = output[len('https://')+len(GITHUB_DOMAIN):]
+			elif output.startswith(REPO_SSH_PREFIX):
+				output = output[len(REPO_SSH_PREFIX):]
 			else:
 				panic("Upstream remote is not a github repository. Got " + output + " instead.")
 
@@ -136,7 +135,7 @@ def extract_issue_link(line):
 		return None
 
 def open_url(url):
-	webbrowser.open_new_tab(HTTPS_PREFIX + url)
+	webbrowser.open_new_tab('https://' + url)
 
 def panic(error):
 	sublime.error_message("Ticket Master Error: " + error)
@@ -177,21 +176,22 @@ def request(method, url, options=None):
 	conn.request(method, path, body, headers)
 	return conn.getresponse()
 
-def authenticated_post(url, token, params=None):
-	params = params or {}
+def authenticated_post(url, token, params={}):
+	if params:
+		params = json.dumps(params)
 
-	print('{0}:{1}'.format(token, ''))
-	print('{0}:{1}'.format(token, '').encode('utf-8'))
+	auth_token  = '{0}:{1}'.format(token, '').encode('utf-8')
+	encoded_auth_token = base64.b64encode(auth_token) #TODO fix bug
+	auth_string = 'Basic {0}'.format(encoded_auth_token.decode('utf-8'))
 
-	encoded_userpass = base64.b64encode('{0}:{1}'.format(token, '').encode('utf-8')) #TODO fix bug
-	auth_string = 'Basic {0}'.format(encoded_userpass.decode('utf-8'))
+	headers = {}
+	headers['Authorization'] = auth_string
+	headers['Content-type'] = 'application/x-www-form-urlencoded'
+	headers['User-Agent'] = 'ticketmaster'
 
-	options = {'params': params,
-			   'ssl': True,
-			   'headers': {'Authorization': auth_string,
-						   'Content-type': 'application/x-www-form-urlencoded',
-						   'User-Agent': 'ticketmaster'}}
-
-	print(options)
+	options = {}
+	options['params'] = params
+	options['ssl'] = True
+	options['headers'] = headers
 
 	return request('POST', url, options)
