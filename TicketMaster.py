@@ -12,7 +12,6 @@ import json
 import re
 from urllib.parse import urlparse
 
-#TODO extract constants [github.com/amit-bansil/TicketMaster/issues/12]
 #TODO fix crash on select all [github.com/amit-bansil/TicketMaster/issues/13]
 
 
@@ -33,6 +32,16 @@ TOKEN_KEY = 'tm-github-token'
 
 PREFERENCES_FILE = 'Preferences.sublime-settings'
 
+#UI
+PANIC_INVALID_GITHUB_JSON = 'Crash reading github JSON'
+PANIC_PUSH_ISSUE_FAILS = 'Problem connecting to Github: (Error {status})\n{body}'
+PANIC_UPSTREAM_REPO_NOT_GITHUB = 'Upstream remote is not a github repository. Got {output} instead.'
+PANIC_GIT_LS_REMOTE_FAILS = ("Couldn't determine github repository based on ls-remote.\n" +
+	"Try running: git ls-remote --get-url in '{file_dir}'")
+PANIC_NOT_SAVED = "File hasn't been saved yet."
+PANIC_NOT_SETUP = 'You need to setup Ticket Master running the Setup command.'
+PROMPT_INPUT_TOKEN = 'You are being redirected to Github. Create a token with that scope and paste it in the box below.'
+INPUT_TOKEN_LABEL = 'Your github token: '
 class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		
@@ -80,9 +89,9 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 				# Write url in file
 				self.view.insert(edit, point, ' [{}]'.format(issue[len('https://'):]))
 			except:
-				panic("Crash reading github JSON")
+				panic(PANIC_INVALID_GITHUB_JSON)
 		else:
-			panic("Problem connecting to Github: (Error {0}) {1}".format(res.status, res_body))
+			panic(PANIC_PUSH_ISSUE_FAILS.format(status=res.status, body=res_body))
 
 	def get_github_repo(self):
 		file_dir = self.get_file_directory()
@@ -94,20 +103,18 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 			elif output.startswith(REPO_SSH_PREFIX):
 				output = output[len(REPO_SSH_PREFIX):]
 			else:
-				panic("Upstream remote is not a github repository. Got " + output + " instead.")
+				panic(PANIC_UPSTREAM_REPO_NOT_GITHUB.format(output=output))
 
 			return output[:-len(GIT_SUFFIX)-1]
 
 		except:
 			traceback.print_exc()
-			print(file_dir)
-			panic("Couldn't determine github repository based on ls-remote. " +
-				"Try running: git ls-remote --get-url in "+file_dir)
+			panic(PANIC_GIT_LS_REMOTE_FAILS.format(file_dir))
 
 	def get_file_directory(self):
 		filepath = self.view.file_name()
 		if not filepath:
-			panic("File hasn't been saved")
+			panic(PANIC_NOT_SAVED)
 
 		return path.dirname(filepath)
 
@@ -116,7 +123,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 		t = s.get(TOKEN_KEY, None)
 
 		if not t:
-			panic("You need to setup Ticket Master running the Setup command.")
+			panic(PANIC_NOT_SETUP)
 		return t
 
 def extract_issue_title(line):
@@ -142,8 +149,8 @@ def panic(error):
 
 class SetuptokenCommand(sublime_plugin.WindowCommand):
 	def run(self):
-		sublime.message_dialog("You are being redirected to Github. Create a token with that scope and paste it in the box below.")
-		self.window.show_input_panel("Your github token: ", "", self.save, None, None)
+		sublime.message_dialog(PROMPT_INPUT_TOKEN)
+		self.window.show_input_panel(INPUT_TOKEN_LABEL, "", self.save, None, None)
 		open_url(TOKEN_URL)
 
 	def save(self, token):
