@@ -26,6 +26,7 @@ ISSUE_LINK_REGEX = (
 
 ISSUE_REGEX = 'TODO\:?(.*)'
 GITHUB_DOMAIN = 'github.com/'
+REPO_SSH_PREFIX = 'git@github.com:'
 ISSUE_API_URL_PATTERN = 'https://api.' + GITHUB_DOMAIN + "repos/{repo}/issues"
 NEW_ISSUE_URL_PATTERN = GITHUB_DOMAIN + "{repo}/issues/new"
 GIT_SUFFIX = '.git'
@@ -78,14 +79,14 @@ class CreateissueCommand(sublime_plugin.TextCommand):
             except:
                 panic(uicopy.PANIC_INVALID_GITHUB_JSON)
         else:
-            panic_args = {status: res.status, body: res_body}
+            panic_args = {'status': res.status, 'body': res_body}
             panic(uicopy.PANIC_PUSH_ISSUE_FAILS.format(**panic_args))
 
     def get_github_repo(self):
         file_dir = self.get_file_directory()
         try:
             output = subprocess.check_output(LS_REMOTE_CMD, cwd=file_dir)
-            output = output.decode("utf-8")
+            output = output.decode('utf-8')
             if output.startswith('https://' + GITHUB_DOMAIN):
                 output = output[len('https://') + len(GITHUB_DOMAIN):]
             elif output.startswith(REPO_SSH_PREFIX):
@@ -150,8 +151,8 @@ class SetuptokenCommand(sublime_plugin.WindowCommand):
         open_url(TOKEN_URL)
 
     def save(self, token):
-        s = sublime.load_settings(PREFERENCES_FILE)
-        t = s.set(TOKEN_KEY, token)
+        settings = sublime.load_settings(PREFERENCES_FILE)
+        settings.set(TOKEN_KEY, token)
         sublime.save_settings(PREFERENCES_FILE)
 
 
