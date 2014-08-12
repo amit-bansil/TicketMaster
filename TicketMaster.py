@@ -197,16 +197,17 @@ def authenticated_post(url, token, params={}):
     encoded_auth_token = base64.b64encode(auth_token)  # TODO fix bug
     auth_string = 'Basic {0}'.format(encoded_auth_token.decode('utf-8'))
 
-    headers = {}
-    headers['Authorization'] = auth_string
-    headers['Content-type'] = 'application/x-www-form-urlencoded'
-    headers['User-Agent'] = 'ticketmaster'
+    headers = {
+        'Authorization': auth_string,
+        'Content-type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'ticketmaster'
+    }
 
-    options = {}
-    print(params)
-    options['params'] = params
-    options['ssl'] = True
-    options['headers'] = headers
+    options = {
+        'params': params,
+        'ssl': True,
+        'headers': headers
+    }
 
     return request('POST', url, options)
 
