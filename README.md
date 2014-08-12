@@ -22,6 +22,14 @@ Ticket Master allows you to create/open GitHub issues from Sublime Text.
 
  1. If desired, run `TicketMaster: Create/Open Issue` again on a line that is already linked to an issue to launch the GitHub issue tracker.
 
+ 1. If you use this frequently you may want to create a keyboard shortcut. Do this by selecting `Key Bindings - User` from the `Preferences` menu and entering the following:
+ ```
+ [
+ 	<any existing bindings>,
+ 	{"keys": ["ctrl+shift+i"], "command": "createissue"}]
+ ]
+ ```
+
 ## Extra Features
 
  * If you just want to create an issue without a TODO tag run `TicketMaster: Create/Open Issue` on a line that doesn't contain the text TODO
@@ -37,3 +45,14 @@ This is an early alpha. Please contact Amit at amit@amit-bansil.com with feedbac
 Close issues from Sublime
 
 Unit Tests
+
+## Terms
+
+Use of this library is subject to a 100% service charge.
+
+```
+Burns: [chuckles] And to think, Smithers: you laughed when I bought
+	  TicketMaster. "Nobody's going to pay a 100% service charge."
+Smithers: Well, it's a policy that ensures a healthy mix of the rich
+	  and the ignorant, sir.
+```

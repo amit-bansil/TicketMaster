@@ -4,5 +4,5 @@ PANIC_UPSTREAM_REPO_NOT_GITHUB = "Upstream remote is not a GitHub repository. Go
 PANIC_GIT_LS_REMOTE_FAILS = "Couldn't determine GitHub repository based on ls-remote.\nTry running: git ls-remote --get-url in '{file_dir}'"
 PANIC_NOT_SAVED = "File hasn't been saved yet."
 PANIC_NOT_SETUP = "Run `Ticket Master: Setup` to connect to GitHub."
-PROMPT_INPUT_TOKEN = "Hit OK to redirect to GitHub and generate an access token.\nPaste it into the box at the bottom of this window."
+PROMPT_INPUT_TOKEN = "Hit OK to redirect to GitHub and generate an access token.\n Next, paste it into the box at the bottom of this window."
 INPUT_TOKEN_LABEL = "Paste token here: "
