@@ -1,4 +1,6 @@
 #TODO Sort dependencies [github.com/amit-bansil/TicketMaster/issues/11]
+#TODO network errors
+
 import sublime, sublime_plugin
 import os.path as path
 import subprocess
@@ -175,7 +177,7 @@ def request(method, url, options=None):
 	return conn.getresponse()
 
 def authenticated_post(url, token, params={}):
-	if(params)
+	if params:
 		params = json.dumps(params)
 
 	auth_token  = '{0}:{1}'.format(token, '').encode('utf-8')
