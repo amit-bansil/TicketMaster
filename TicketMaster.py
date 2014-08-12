@@ -10,6 +10,8 @@ import re
 
 from urllib.parse import urlparse
 
+# TODO:Clean up the code [github.com/amit-bansil/TicketMaster/issues/10]
+
 ISSUE_LINK_REGEX = (
 	'\[(' + # capture everything after an open bracket
 	'github\.com\/' + # that starts with github.com
