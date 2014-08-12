@@ -37,6 +37,7 @@ PREFERENCES_FILE = 'Preferences.sublime-settings'
 
 
 class CreateissueCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         view = self.view
         something_happened = False
@@ -49,7 +50,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
                 issue_url = extract_issue_link(line)
 
                 if issue_url:
-                    open_url(issue_url) 
+                    open_url(issue_url)
                     something_happened = True
                 else:
                     title = extract_issue_title(line)
@@ -57,7 +58,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
                         self.push_issue(edit, fullLineRegion.end(), title)
                         something_happened = True
 
-        if not something_happened:  
+        if not something_happened:
             open_url(NEW_ISSUE_URL_PATTERN.format(repo=self.get_github_repo()))
 
     def push_issue(self, edit, point, title):
@@ -69,7 +70,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
         res_body = res.read().decode('utf-8')
         if res.status == 201:
             try:
-                res_params = json.loads(res_body) 
+                res_params = json.loads(res_body)
                 issue = res_params.get('html_url')
                 # Write url in file
                 issue_link = ' [{}]'.format(issue[len('https://'):])
@@ -77,23 +78,23 @@ class CreateissueCommand(sublime_plugin.TextCommand):
             except:
                 panic(uicopy.PANIC_INVALID_GITHUB_JSON)
         else:
-            panic_args = {status:res.status, body:res_body}
+            panic_args = {status: res.status, body: res_body}
             panic(uicopy.PANIC_PUSH_ISSUE_FAILS.format(**panic_args))
 
     def get_github_repo(self):
         file_dir = self.get_file_directory()
-        try: 
+        try:
             output = subprocess.check_output(LS_REMOTE_CMD, cwd=file_dir)
             output = output.decode("utf-8")
             if output.startswith('https://' + GITHUB_DOMAIN):
-                output = output[len('https://')+len(GITHUB_DOMAIN):]
+                output = output[len('https://') + len(GITHUB_DOMAIN):]
             elif output.startswith(REPO_SSH_PREFIX):
                 output = output[len(REPO_SSH_PREFIX):]
             else:
                 msg = uicopy.PANIC_UPSTREAM_REPO_NOT_GITHUB
                 panic(msg.format(output=output))
 
-            return output[:-len(GIT_SUFFIX)-1]
+            return output[:-len(GIT_SUFFIX) - 1]
 
         except:
             traceback.print_exc()
@@ -114,12 +115,14 @@ class CreateissueCommand(sublime_plugin.TextCommand):
             panic(uicopy.PANIC_NOT_SETUP)
         return t
 
+
 def extract_issue_title(line):
     matches = re.findall(ISSUE_REGEX, line)
     if matches:
         return matches[-1]
     else:
         return None
+
 
 def extract_issue_link(line):
     matches = re.findall(ISSUE_LINK_REGEX, line)
@@ -128,18 +131,22 @@ def extract_issue_link(line):
     else:
         return None
 
+
 def open_url(url):
     webbrowser.open_new_tab('https://' + url)
+
 
 def panic(error):
     sublime.error_message("Ticket Master Error: " + error)
     raise Exception(error)
 
+
 class SetuptokenCommand(sublime_plugin.WindowCommand):
+
     def run(self):
         sublime.message_dialog(uicopy.PROMPT_INPUT_TOKEN)
         self.window.show_input_panel(uicopy.INPUT_TOKEN_LABEL,
-            "", self.save, None, None)
+                                     "", self.save, None, None)
         open_url(TOKEN_URL)
 
     def save(self, token):
@@ -147,11 +154,14 @@ class SetuptokenCommand(sublime_plugin.WindowCommand):
         t = s.set(TOKEN_KEY, token)
         sublime.save_settings(PREFERENCES_FILE)
 
+
 class RemovetokenCommand(sublime_plugin.ApplicationCommand):
+
     def run(self):
         s = sublime.load_settings(PREFERENCES_FILE)
         s.erase(TOKEN_KEY)
         sublime.save_settings(PREFERENCES_FILE)
+
 
 def request(method, url, options=None):
     options = options or {}
@@ -171,12 +181,13 @@ def request(method, url, options=None):
     conn.request(method, path, body, headers)
     return conn.getresponse()
 
+
 def authenticated_post(url, token, params={}):
     if params:
         params = json.dumps(params)
 
-    auth_token  = '{0}:{1}'.format(token, '').encode('utf-8')
-    encoded_auth_token = base64.b64encode(auth_token) # TODO fix bug
+    auth_token = '{0}:{1}'.format(token, '').encode('utf-8')
+    encoded_auth_token = base64.b64encode(auth_token)  # TODO fix bug
     auth_string = 'Basic {0}'.format(encoded_auth_token.decode('utf-8'))
 
     headers = {}
