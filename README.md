@@ -20,7 +20,7 @@ Ticket Master allows you to create/open GitHub issues from Sublime Text.
 
  1. An issue will be created in GitHub and a link will be placed at the end of your comment
 
- 1. If desired, run `TicketMaster: Create/Open Issue` again to launch the GitHub issue tracker.
+ 1. If desired, run `TicketMaster: Create/Open Issue` again on a line that is already linked to an issue to launch the GitHub issue tracker.
 
 ## Extra Features
 
