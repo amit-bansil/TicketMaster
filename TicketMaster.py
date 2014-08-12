@@ -33,15 +33,23 @@ TOKEN_KEY = 'tm-github-token'
 PREFERENCES_FILE = 'Preferences.sublime-settings'
 
 #UI
-PANIC_INVALID_GITHUB_JSON = 'Crash reading GitHub JSON'
-PANIC_PUSH_ISSUE_FAILS = 'Problem connecting to Github: (Error {status})\n{body}'
-PANIC_UPSTREAM_REPO_NOT_GITHUB = 'Upstream remote is not a github repository. Got {output} instead.'
-PANIC_GIT_LS_REMOTE_FAILS = ("Couldn't determine github repository based on ls-remote.\n" +
-	"Try running: git ls-remote --get-url in '{file_dir}'")
+PANIC_INVALID_GITHUB_JSON = 'Crash reading GitHub JSON. ' + \
+	'If this persists please file a bug at ' + \
+	'https://github.com/amit-bansil/TicketMaster'
+PANIC_PUSH_ISSUE_FAILS = 'Problem connecting to Github: ' + \
+	'(Error {status})\n{body}. ' + \
+	'Please check your connection to GitHub.com.'
+PANIC_UPSTREAM_REPO_NOT_GITHUB = 'Upstream remote is not a GitHub ' + \
+	'repository. Got {output} instead.'
+PANIC_GIT_LS_REMOTE_FAILS = "Couldn't determine github repository " + \
+	"based on ls-remote.\n" + \
+	"Try running: git ls-remote --get-url in '{file_dir}'"
 PANIC_NOT_SAVED = "File hasn't been saved yet."
-PANIC_NOT_SETUP = 'You need to setup Ticket Master running the Setup command.'
-PROMPT_INPUT_TOKEN = 'You are being redirected to Github. Create a token with that scope and paste it in the box below.'
-INPUT_TOKEN_LABEL = 'Your github token: '
+PANIC_NOT_SETUP = 'Run Ticket Master: Setup  to connect to GitHub.'
+PROMPT_INPUT_TOKEN = 'Hit OK to redirect to GitHub and generate an access token.\n' +
+	'Paste it into the box at the bottom of this window.'
+INPUT_TOKEN_LABEL = 'Paste token here: '
+
 class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		
