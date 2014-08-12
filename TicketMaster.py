@@ -33,7 +33,7 @@ TOKEN_KEY = 'tm-github-token'
 PREFERENCES_FILE = 'Preferences.sublime-settings'
 
 #UI
-PANIC_INVALID_GITHUB_JSON = 'Crash reading github JSON'
+PANIC_INVALID_GITHUB_JSON = 'Crash reading GitHub JSON'
 PANIC_PUSH_ISSUE_FAILS = 'Problem connecting to Github: (Error {status})\n{body}'
 PANIC_UPSTREAM_REPO_NOT_GITHUB = 'Upstream remote is not a github repository. Got {output} instead.'
 PANIC_GIT_LS_REMOTE_FAILS = ("Couldn't determine github repository based on ls-remote.\n" +
@@ -62,7 +62,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 					something_happened = True
 				else:
 					title = extract_issue_title(line)
-					print('title', title)
+					#print('title', title)
 					if title:
 						self.push_issue(edit, fullLineRegion.end(), title)
 						something_happened = True
@@ -79,13 +79,13 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 
 		res = authenticated_post(create_url, github_token, title=title)
 		res_body = res.read().decode('utf-8')
-		print(res_body)
+		#print(res_body)
 
 		if res.status == 201:
 			try:
 				res_params = json.loads(res_body) 
 				issue = res_params.get('html_url')
-				print(issue)
+				#print(issue)
 				# Write url in file
 				self.view.insert(edit, point, ' [{}]'.format(issue[len('https://'):]))
 			except:
