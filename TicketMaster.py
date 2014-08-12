@@ -1,11 +1,10 @@
-# TODO network errors
+# TODO handle network errors [github.com/amit-bansil/TicketMaster/issues/14]
 
 import sublime
 import sublime_plugin
 
-import uicopy
-
 import os.path as path
+import sys
 import subprocess
 import webbrowser
 import traceback
@@ -14,6 +13,10 @@ import base64
 import json
 import re
 from urllib.parse import urlparse
+
+# Add this dir to path
+sys.path.append(path.dirname(__file__))
+import uicopy
 
 # TODO fix crash on select all [github.com/amit-bansil/TicketMaster/issues/13]
 
@@ -67,7 +70,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
         github_token = self.get_github_token()
         create_url = ISSUE_API_URL_PATTERN.format(repo=self.get_github_repo())
 
-        res = authenticated_post(create_url, github_token, title=title)
+        res = authenticated_post(create_url, github_token, {'title': title})
         res_body = res.read().decode('utf-8')
         if res.status == 201:
             try:
@@ -100,7 +103,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 
         except:
             traceback.print_exc()
-            panic(uicopy.PANIC_GIT_LS_REMOTE_FAILS.format(file_dir))
+            panic(uicopy.PANIC_GIT_LS_REMOTE_FAILS.format(file_dir=file_dir))
 
     def get_file_directory(self):
         filepath = self.view.file_name()
@@ -110,12 +113,13 @@ class CreateissueCommand(sublime_plugin.TextCommand):
         return path.dirname(filepath)
 
     def get_github_token(self):
-        s = sublime.load_settings(PREFERENCES_FILE)
-        t = s.get(TOKEN_KEY, None)
+        settings = sublime.load_settings(PREFERENCES_FILE)
+        token = settings.get(TOKEN_KEY, None)
 
-        if not t:
+        if token:
+            return token
+        else:
             panic(uicopy.PANIC_NOT_SETUP)
-        return t
 
 
 def extract_issue_title(line):
@@ -199,6 +203,7 @@ def authenticated_post(url, token, params={}):
     headers['User-Agent'] = 'ticketmaster'
 
     options = {}
+    print(params)
     options['params'] = params
     options['ssl'] = True
     options['headers'] = headers
@@ -207,7 +212,7 @@ def authenticated_post(url, token, params={}):
 
 
 def trim_suffix(string, suffix):
-    return output[:-len(suffix) - 1]
+    return string[:-len(suffix) - 1]
 
 
 def trim_prefix(string, prefix):
