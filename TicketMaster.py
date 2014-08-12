@@ -87,15 +87,16 @@ class CreateissueCommand(sublime_plugin.TextCommand):
         try:
             output = subprocess.check_output(LS_REMOTE_CMD, cwd=file_dir)
             output = output.decode('utf-8')
-            if output.startswith('https://' + GITHUB_DOMAIN):
-                output = output[len('https://') + len(GITHUB_DOMAIN):]
-            elif output.startswith(REPO_SSH_PREFIX):
-                output = output[len(REPO_SSH_PREFIX):]
+            output = trim_suffix(output, GIT_SUFFIX)
+            https_repo = trim_prefix(output, 'https://' + GITHUB_DOMAIN)
+            ssh_repo = trim_prefix(output, REPO_SSH_PREFIX)
+            if https_repo:
+                return https_repo
+            elif ssh_repo:
+                return ssh_repo
             else:
                 msg = uicopy.PANIC_UPSTREAM_REPO_NOT_GITHUB
                 panic(msg.format(output=output))
-
-            return output[:-len(GIT_SUFFIX) - 1]
 
         except:
             traceback.print_exc()
@@ -163,6 +164,7 @@ class RemovetokenCommand(sublime_plugin.ApplicationCommand):
         s.erase(TOKEN_KEY)
         sublime.save_settings(PREFERENCES_FILE)
 
+#utility functions
 
 def request(method, url, options=None):
     options = options or {}
@@ -202,3 +204,14 @@ def authenticated_post(url, token, params={}):
     options['headers'] = headers
 
     return request('POST', url, options)
+
+
+def trim_suffix(string, suffix):
+    return output[:-len(suffix) - 1]
+
+
+def trim_prefix(string, prefix):
+    if string.startswith(prefix):
+        return string[len(prefix):]
+    else:
+        return None
