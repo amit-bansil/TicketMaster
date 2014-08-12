@@ -28,7 +28,7 @@ GITHUB_DOMAIN = 'github.com/'
 ISSUE_API_URL_PATTERN = 'https://api.' + GITHUB_DOMAIN + "repos/{repo}/issues"
 NEW_ISSUE_URL_PATTERN = GITHUB_DOMAIN + "{repo}/issues/new"
 GIT_SUFFIX = '.git'
-
+LS_REMOTE_CMD = "git ls-remote --get-url".split()
 TOKEN_URL = GITHUB_DOMAIN + 'settings/tokens/new?scopes=repo,public_repo'
 TOKEN_KEY = 'tm-github-token'
 
@@ -39,8 +39,9 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 		view = self.view
 		something_happened = False
 		for regionOfLines in view.sel():
-			# must reverse lines or edits to selection will interfere with lookups
-			for lineSubRegion in reversed(view.split_by_newlines(regionOfLines)):
+			splitRegionsOfLines = view.split_by_newlines(regionOfLines)
+			# reverse lines or edits to selection will interfere with lookups
+			for lineSubRegion in reversed(splitRegionsOfLines):
 				fullLineRegion = view.line(lineSubRegion)
 				line = view.substr(fullLineRegion)
 				issue_url = extract_issue_link(line)
@@ -73,25 +74,27 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 			try:
 				res_params = json.loads(res_body) 
 				issue = res_params.get('html_url')
-				#print(issue)
 				# Write url in file
-				self.view.insert(edit, point, ' [{}]'.format(issue[len('https://'):]))
+				issue_link = ' [{}]'.format(issue[len('https://'):])
+				self.view.insert(edit, point, issue_link)
 			except:
 				panic(uicopy.PANIC_INVALID_GITHUB_JSON)
 		else:
-			panic(uicopy.PANIC_PUSH_ISSUE_FAILS.format(status=res.status, body=res_body))
+			panic_args = {status:res.status, body:res_body}
+			panic(uicopy.PANIC_PUSH_ISSUE_FAILS.format(**panic_args))
 
 	def get_github_repo(self):
 		file_dir = self.get_file_directory()
 		try: 
-			output = subprocess.check_output(["git", "ls-remote","--get-url"], cwd=file_dir)
+			output = subprocess.check_output(LS_REMOTE_CMD, cwd=file_dir)
 			output = output.decode("utf-8")
 			if output.startswith('https://' + GITHUB_DOMAIN):
 				output = output[len('https://')+len(GITHUB_DOMAIN):]
 			elif output.startswith(REPO_SSH_PREFIX):
 				output = output[len(REPO_SSH_PREFIX):]
 			else:
-				panic(uicopy.PANIC_UPSTREAM_REPO_NOT_GITHUB.format(output=output))
+				msg = uicopy.PANIC_UPSTREAM_REPO_NOT_GITHUB
+				panic(msg.format(output=output))
 
 			return output[:-len(GIT_SUFFIX)-1]
 
@@ -138,7 +141,8 @@ def panic(error):
 class SetuptokenCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		sublime.message_dialog(uicopy.PROMPT_INPUT_TOKEN)
-		self.window.show_input_panel(uicopy.INPUT_TOKEN_LABEL, "", self.save, None, None)
+		self.window.show_input_panel(uicopy.INPUT_TOKEN_LABEL,
+			"", self.save, None, None)
 		open_url(TOKEN_URL)
 
 	def save(self, token):
