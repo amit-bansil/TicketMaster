@@ -10,9 +10,9 @@ Ticket Master allows you to create/open GitHub issues from Sublime Text.
 
  1. Run `Install Package` from the [Command Palette](http://sublime-text-unofficial-documentation.readthedocs.org/en/latest/reference/command_palette.html)
 
- 1. Select 'TicketMaster'
+ 1. Select `TicketMaster`
 
- 1. Type a comment in your file starting with TODO
+ 1. Type a comment in your file starting with `TODO`
 
  1. Run `TicketMaster: Create/Open Issue` from the Command Palette.
 
