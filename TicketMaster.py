@@ -2,6 +2,8 @@
 
 import sublime, sublime_plugin
 
+import uicopy
+
 import os.path as path
 import subprocess
 import webbrowser
@@ -32,30 +34,8 @@ TOKEN_KEY = 'tm-github-token'
 
 PREFERENCES_FILE = 'Preferences.sublime-settings'
 
-#UI
-PANIC_INVALID_GITHUB_JSON = 'Crash reading GitHub JSON. ' + \
-	'If this persists please file a bug at ' + \
-	'https://github.com/amit-bansil/TicketMaster'
-PANIC_PUSH_ISSUE_FAILS = 'Problem connecting to Github: ' + \
-	'(Error {status})\n{body}. ' + \
-	'Please check your connection to GitHub.com.'
-PANIC_UPSTREAM_REPO_NOT_GITHUB = 'Upstream remote is not a GitHub ' + \
-	'repository. Got {output} instead.'
-PANIC_GIT_LS_REMOTE_FAILS = "Couldn't determine github repository " + \
-	"based on ls-remote.\n" + \
-	"Try running: git ls-remote --get-url in '{file_dir}'"
-PANIC_NOT_SAVED = "File hasn't been saved yet."
-PANIC_NOT_SETUP = 'Run Ticket Master: Setup  to connect to GitHub.'
-PROMPT_INPUT_TOKEN = 'Hit OK to redirect to GitHub and generate an access token.\n' +
-	'Paste it into the box at the bottom of this window.'
-INPUT_TOKEN_LABEL = 'Paste token here: '
-
 class CreateissueCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
-		
-		# Check if the user is already logged in.
-		#print(self.get_github_token())
-
 		view = self.view
 		something_happened = False
 		for regionOfLines in view.sel():
@@ -97,9 +77,9 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 				# Write url in file
 				self.view.insert(edit, point, ' [{}]'.format(issue[len('https://'):]))
 			except:
-				panic(PANIC_INVALID_GITHUB_JSON)
+				panic(uicopy.PANIC_INVALID_GITHUB_JSON)
 		else:
-			panic(PANIC_PUSH_ISSUE_FAILS.format(status=res.status, body=res_body))
+			panic(uicopy.PANIC_PUSH_ISSUE_FAILS.format(status=res.status, body=res_body))
 
 	def get_github_repo(self):
 		file_dir = self.get_file_directory()
@@ -111,18 +91,18 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 			elif output.startswith(REPO_SSH_PREFIX):
 				output = output[len(REPO_SSH_PREFIX):]
 			else:
-				panic(PANIC_UPSTREAM_REPO_NOT_GITHUB.format(output=output))
+				panic(uicopy.PANIC_UPSTREAM_REPO_NOT_GITHUB.format(output=output))
 
 			return output[:-len(GIT_SUFFIX)-1]
 
 		except:
 			traceback.print_exc()
-			panic(PANIC_GIT_LS_REMOTE_FAILS.format(file_dir))
+			panic(uicopy.PANIC_GIT_LS_REMOTE_FAILS.format(file_dir))
 
 	def get_file_directory(self):
 		filepath = self.view.file_name()
 		if not filepath:
-			panic(PANIC_NOT_SAVED)
+			panic(uicopy.PANIC_NOT_SAVED)
 
 		return path.dirname(filepath)
 
@@ -131,7 +111,7 @@ class CreateissueCommand(sublime_plugin.TextCommand):
 		t = s.get(TOKEN_KEY, None)
 
 		if not t:
-			panic(PANIC_NOT_SETUP)
+			panic(uicopy.PANIC_NOT_SETUP)
 		return t
 
 def extract_issue_title(line):
@@ -157,8 +137,8 @@ def panic(error):
 
 class SetuptokenCommand(sublime_plugin.WindowCommand):
 	def run(self):
-		sublime.message_dialog(PROMPT_INPUT_TOKEN)
-		self.window.show_input_panel(INPUT_TOKEN_LABEL, "", self.save, None, None)
+		sublime.message_dialog(uicopy.PROMPT_INPUT_TOKEN)
+		self.window.show_input_panel(uicopy.INPUT_TOKEN_LABEL, "", self.save, None, None)
 		open_url(TOKEN_URL)
 
 	def save(self, token):
