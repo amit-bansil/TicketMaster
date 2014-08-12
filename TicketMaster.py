@@ -1,7 +1,7 @@
-#TODO Sort dependencies [github.com/amit-bansil/TicketMaster/issues/11]
 #TODO network errors
 
 import sublime, sublime_plugin
+
 import os.path as path
 import subprocess
 import webbrowser
@@ -10,7 +10,6 @@ import http.client as httplib
 import base64
 import json
 import re
-
 from urllib.parse import urlparse
 
 #TODO extract constants [github.com/amit-bansil/TicketMaster/issues/12]
