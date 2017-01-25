@@ -2,7 +2,7 @@
 
 GitHub Issues for Sublime.
 
-Ticket Master allows you to create/open GitHub issues from Sublime Text.
+Ticket Master allows you to create/open GitHub issues from Sublime Text by simply typing TODO comments.
 
 ## Installation/Usage
 
